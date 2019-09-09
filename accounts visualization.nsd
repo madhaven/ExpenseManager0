@@ -1,0 +1,44 @@
+1
+1
+...
+0
+9
+1
+if (screen!=previouscreen)
+0
+0
+0
+0
+0
+1
+1
+...
+2
+system("cls");
+previouscreen=screen;
+11
+11
+5
+1
+i=0; i,120; i++
+0
+1
+2
+            gotoxy(i, 3); cout<<(char)196;
+            gotoxy(i, 33); cout<<(char)196;
+0
+11
+1
+5
+        gotoxy(10, 2);
+        cout<<"ACCOUNTS";
+        gotoxy(0, 34);
+        cout<<"Account count - ";
+        cout<<accounts;
+0
+5
+1
+while (1)
+0
+11
+11
