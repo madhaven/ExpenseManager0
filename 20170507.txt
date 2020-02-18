@@ -1,0 +1,1370 @@
+#include <JAYcreations.h>
+    char temfilename[50], logfilename[50], accfilename[50], pasfilename[50], word[100];
+    int logs, accounts, screen, previouscreen;
+    ifstream filein;
+    fstream file;
+    ofstream fileout;
+
+class Paclass
+{
+public:
+    char word[100];
+    bool allowed;
+}password;
+class Acclass
+{
+public:
+    bool addtotal, hide;
+    char name[100];
+}accclass, accclass2;
+class Loclass
+{
+public:
+    long double newbalance;
+    char thetime[30], details[35], account[100];
+    int year, month, date, hour, minute, second;
+    void refresh()
+    {
+        newbalance=NULL;
+        strcpy(thetime, "\0");
+        strcpy(details, "\0");
+        year=NULL;
+        month=NULL;
+        date=NULL;
+        hour=NULL;
+        minute=NULL;
+        second=NULL;
+    }
+    void timeremod()
+    {
+        time_t bleh;
+        bleh=time(0);
+        strcpy(thetime, ctime(&bleh));
+        switch (thetime[6])
+        {
+            case 'b':month =2; break;
+            case 'y':month=5; break;
+            case 'l':month=7; break;
+            case 'g':month=8; break;
+            case 'p':month=9; break;
+            case 't':month =10; break;
+            case 'v':month=11;break;
+            case 'c':month=12; break;
+            case 'n':if (thetime[5]=='a')
+                        month=1;
+                    else month =6; break;
+            case 'r':if (thetime[5]=='a')
+                        month=3;
+                    else month =4; break;
+        }
+        year=0;
+        for (int i=0; i<4; i++)
+            year+=pow(10, 3-i)*(thetime[20+i]-'0');
+        date=0;
+        for (int i=0; i<2; i++)
+            date+=pow(10, 1-i)*(thetime[8+i]-'0');
+        hour=0;
+        for (int i=0; i<2; i++)
+            hour+=pow(10, 1-i)*(thetime[11+i]-'0');
+        minute=0;
+        for (int i=0; i<2; i++)
+            minute+=pow(10, 1-i)*(thetime[14+i]-'0');
+        second=0;
+        for (int i=0; i<2; i++)
+            second+=pow(10, 1-i)*(thetime[17+i]-'0');
+    }
+}logclass, logclass2;
+/*
+void arrangelog()
+{
+    bool shift=false;
+    int temp;
+    for (int i=0; i<logs; i++)
+        for (int j=i; j<logs; j++)
+    {
+        file.open(logfilename, ios::binary|ios::in);
+        file.seekg(i*sizeof(logclass), ios::beg);
+        file.read((char*)&logclass, sizeof(logclass));
+        file.close();
+        file.open(logfilename, ios::binary|ios::in);
+        file.seekg(j*sizeof(logclass2), ios::beg);
+        file.read((char*)&logclass2, sizeof(logclass2));
+        file.close();
+        if (logclass.year>logclass2.year)
+            shift=true;
+        else if (logclass.month>logclass2.month)
+            shift=true;
+        else if (logclass.date>logclass2.date)
+            shift=true;
+        else if (logclass.hour>logclass2.hour)
+            shift=true;
+        else if (logclass.minute>logclass2.minute)
+            shift=true;
+        else if (logclass.second>logclass2.second)
+            shift=true;
+
+        if (shift)
+        {
+            file2.open(logfilename, ios::binary|ios::out);
+            file2.seekp(i*sizeof(logclass2), ios::beg);
+            file2.write((char*)&logclass2, sizeof(logclass2));
+            file2.close();
+            file2.open(logfilename, ios::binary|ios::out);
+            file2.seekp(i*sizeof(logclass), ios::beg);
+            file2.write((char*)&logclass2, sizeof(logclass2));
+            file2.close();
+            shift=!shift;
+        }
+    }
+}//*/
+void instructions()
+{/// ############################################
+    system("Cls");
+    cout<<"these are your instructions";
+    getch();
+}
+bool authorized()
+{
+    password.allowed=true;
+    file.open(pasfilename, ios::binary|ios::in);
+    file.read((char*)&password, sizeof(password));
+    file.close();
+    if (password.allowed)
+        return true;
+    gotoxy(60-strlen("password : "), 18);
+    cout<<"Password : ";
+    getpass(word);
+    system("cls");
+    if (strcmp(word, password.word)==0)
+        return true;
+    return false;
+}
+int accountcount()
+{
+    int accounts=0;
+    filein.open(accfilename, ios::binary);
+    while (filein.read((char*)&accclass, sizeof(accclass)))
+        accounts++;
+    filein.close();
+    return accounts;
+}
+int logcount()
+{
+    int lo=0;
+    filein.open(logfilename, ios::binary);
+    while (filein.read((char*)&logclass, sizeof(logclass)))
+        lo++;
+    filein.close();
+    return lo;
+}
+int logcountspecific(char accname[100])
+{
+    Loclass X;
+    int lo=0;
+    filein.open(logfilename, ios::binary);
+    while (filein.read((char*)&X, sizeof(X)))
+        if (strcmp(X.account, accname)==0)
+            lo++;
+    filein.close();
+    return lo;
+}
+int mainmenu()
+{
+    int width=16, choice=10, options=4, suboptions=4, subchoice=3;
+    for (int i=31; i<=89; i++)
+    {
+        gotoxy(i, 10);
+        cout<<(char)196;
+        gotoxy(i, 22);
+        cout<<(char)196;
+    }
+    for (int i=11; i<=21; i++)
+    {
+        gotoxy(30, i); cout<<(char)179;
+        gotoxy(90, i); cout<<(char)179;
+    }
+    gotoxy(30, 10); cout<<(char)218;
+    gotoxy(90, 10); cout<<(char)191;
+    gotoxy(30, 22); cout<<(char)192;
+    gotoxy(90, 22); cout<<(char)217;
+    for (int i=11; i<=21; i++)
+        for (int j=31; j<=89; j++)
+        {   gotoxy(j, i); cout<<" ";    }
+    gotoxy(58, 12); cout<<"MENU";
+    gotoxy(58, width); cout<<"LOGS";
+    gotoxy(56, width+1); cout<<"ACCOUNTS";
+    gotoxy(56, width+2); cout<<"PASSWORD";
+    gotoxy(58, width+3); cout<<"EXIT";
+
+
+    while (1)
+    {
+        xyz:
+        if (choice==10) goto thekip;
+        gotoxy(50, choice+width); cout<<"[";
+        gotoxy(70, choice+width); cout<<"]";
+        thekip:
+        gotoxy(60, 30);
+
+        if (choice==0)
+        {
+            gotoxy(65, width); cout<<(char)205<<(char)184<<"  Yearly";
+            gotoxy(66, width+1); cout<<(char)179<<"  Monthly";
+            gotoxy(66, width+2); cout<<(char)179<<"  Daily";
+            gotoxy(66, width+3); cout<<(char)179<<"  All";
+            while (1)
+            {
+                gotoxy(80, subchoice+width); cout<<"]";
+                gotoxy(60, 30);
+                if (getch()=='\r')
+                {
+                    for (int i=30; i<=90; i++)for (int j=10; j<=22; j++)
+                    {   gotoxy(i, j); cout<<" ";    }
+                    return subchoice+5;
+                }
+                gotoxy(80, subchoice+width); cout<<" ";
+                if (GetAsyncKeyState(VK_UP)&&(subchoice>0))
+                {
+                    getch();
+                    if (subchoice==0)
+                    {
+                        gotoxy(50, choice+width); cout<<" ";
+                        choice--;
+                        break;
+                    }
+                    subchoice--;
+                }
+                else if (GetAsyncKeyState(VK_DOWN)&&(subchoice<options))
+                {
+                    getch();
+                    if (subchoice==options-1)
+                    {
+                        gotoxy(50, choice+width); cout<<" ";
+                        choice++;
+                        break;
+                    }
+                    subchoice++;
+                }
+                else if (GetAsyncKeyState(VK_ESCAPE))
+                    continue;
+            }
+            gotoxy(65, width); cout<<"          ";
+            gotoxy(66, width+1); cout<<"           ";
+            gotoxy(66, width+2); cout<<"        ";
+            gotoxy(66, width+3); cout<<"      ";
+            goto xyz;
+        }
+        if (getch()=='\r')
+        {
+            for (int i=30; i<=90; i++)for (int j=10; j<=22; j++)
+            {   gotoxy(i, j); cout<<" ";    }
+            return choice+1;
+        }
+        if (choice==10) goto thekip2;
+        gotoxy(50, choice+width); cout<<" ";
+        gotoxy(70, choice+width); cout<<" ";
+        thekip2:
+        if (GetAsyncKeyState(VK_DOWN)&&(choice<options-1))
+        {
+            choice++;
+            getch();
+        }
+        else if (GetAsyncKeyState(VK_UP))
+        {
+            if (choice==10)
+                choice=3;
+            else if (choice>0)
+                choice--;
+            getch();
+        }
+        else if (GetAsyncKeyState(VK_ESCAPE))
+            continue;
+    }
+}
+int lastdate(int month, int year)
+{
+    int lastdateofthemonth;
+    switch (month)
+    {
+        case 1:lastdateofthemonth=31;break;
+        case 2:if (year%4==0) lastdateofthemonth=29; else lastdateofthemonth=28; break;
+        case 3:lastdateofthemonhttp://en.savefrom.net/#url=http://youtube.com/watch?v=xP2nIy5S_JQ&list=PL62B3794B3F2E925F&index=3&utm_source=youtube.com&utm_medium=short_domains&utm_campaign=www.ssyoutube.comth=31;break;
+        case 4:lastdateofthemonth=30;break;
+        case 5:lastdateofthemonth=31;break;
+        case 6:lastdateofthemonth=30;break;
+        case 7:lastdateofthemonth=31;break;
+        case 8:lastdateofthemonth=31;break;
+        case 9:lastdateofthemonth=30;break;http://en.savefrom.net/#url=http://youtube.com/watch?v=xP2nIy5S_JQ&list=PL62B3794B3F2E925F&index=3&utm_source=youtube.com&utm_medium=short_domains&utm_campaign=www.ssyoutube.com
+        case 10:lastdateofthemonth=31;break;
+        case 11:lastdateofthemonth=30;break;
+        case 12:lastdateofthemonth=31;break;
+    }
+    return lastdateofthemonth;
+}
+int space(long double number)
+{
+    long double cpy=number;
+    int space =0;
+    do
+    {
+        space++;
+        cpy/=10;
+    }while(cpy!=0);
+    if (number>(long)number)
+    {
+        space++;
+        cpy=number;
+        do
+        {
+            space++;
+            cpy*=10;
+        }while(cpy>(long)cpy);
+    }
+    return space;
+}
+void deleteaccount(char waste[100])
+{
+    float time=0.2, loc=15;
+    char name[100];
+    strcpy(name, waste);
+    fileout.open(temfilename, ios::binary);
+    fileout.close();
+    gotoxy(60-strlen("temfile cleared")/2, loc);
+    coutput("temfile cleared", time);
+    filein.open(accfilename, ios::binary);
+    for (int i=0; i<accounts; i++)
+    {
+        filein.seekg(i*sizeof(accclass), ios::beg);
+        filein.read((char*)&accclass, sizeof(accclass));
+        if (strcmp(accclass.name, name)!=0)
+        {
+            fileout.open(temfilename, ios::binary|ios::app);
+            fileout.write((char*)&accclass, sizeof(accclass));
+            fileout.close();
+        }
+    }
+    filein.close();
+    gotoxy(60-strlen("temfile rewritten")/2, ++loc);
+    coutput("temfile rewritten", time);
+    remove(accfilename);
+    gotoxy(60-strlen("accfile removed")/2, ++loc);
+    coutput("accfile removed", time);
+    rename(temfilename, accfilename);
+    gotoxy(60-strlen("temfile renamed to accfile")/2, ++loc);
+    coutput("temfile renamed to accfile", time);
+
+    fileout.open(temfilename, ios::binary);
+    fileout.close();
+    gotoxy(60-strlen("temfile cleared again")/2, ++loc);
+    coutput("temfile cleared again", time);
+    logs=logcount();
+    filein.open(logfilename, ios::binary);
+    for (int i=0; i<logs; i++)
+    {
+        filein.seekg(i*sizeof(logclass), ios::beg);
+        filein.read((char*)&logclass, sizeof(logclass));
+        if (strcmp(logclass.account, name)!=0)
+        {
+            fileout.open(temfilename, ios::binary|ios::app);
+            fileout.write((char*)&logclass, sizeof(logclass));
+            fileout.close();
+        }
+    }
+    filein.close();
+    gotoxy(60-strlen("temfile rewritten again")/2, ++loc);
+    coutput("temfile rewritten again", time);
+    remove(logfilename);
+    gotoxy(60-strlen("logfile removed")/2, ++loc);
+    coutput("logfile removed", time);
+    rename(temfilename, logfilename);
+    gotoxy(60-strlen("temfile renamed to logfile")/2, ++loc); loc+=2;
+    coutput("temfile renamed to logfile", time);
+    _sleep(500);
+    gotoxy(60-(strlen(name)+strlen(" has been deleted"))/2, ++loc);
+    coutput(name, time);
+    coutput(" has been Deleted");
+    getch();
+}
+void editaccount(int cursor)
+{
+    for (int i=21; i<100; i++)
+    {
+        gotoxy(i, 10); cout<<(char)196;
+        gotoxy(i, 30); cout<<(char)196;
+    }
+    for (int i=11; i<30; i++)
+    {
+        gotoxy(20, i); cout<<(char)179;
+        gotoxy(100, i); cout<<(char)179;
+    }
+    gotoxy(100, 10); cout<<(char)191;
+    gotoxy(20, 30); cout<<(char)192;
+    gotoxy(20, 10); cout<<(char)218;
+    gotoxy(100, 30); cout<<(char)217;
+    for (int i=21; i<100; i++)
+        for (int j=11; j<=29; j++)
+    {gotoxy(i, j); cout<<" ";}
+    filein.open(accfilename, ios::binary);
+    filein.seekg(cursor*sizeof(accclass), ios::beg);
+    filein.read((char*)&accclass, sizeof(accclass));
+    filein.close();
+    gotoxy(60-strlen("edit account")/2, 12);
+    cout<<"EDIT ACCOUNT";
+    gotoxy(60-strlen("name : "), 20); cout<<"Name : "<<accclass.name;
+    gotoxy(60-strlen("Status : "), 21); cout<<"Status : ";
+    while(1)
+    {
+        gotoxy(60, 21);
+        if (accclass.hide)
+            cout<<"hidden  ";
+        else cout<<"visible  ";
+        if (getch()=='\r')
+            break;
+        if (GetAsyncKeyState(VK_UP)||GetAsyncKeyState(VK_DOWN))
+        {   accclass.hide=!accclass.hide; getch();  }
+    }
+    gotoxy(60-strlen("Consideration in calculations : "), 22);
+    cout<<"Consideration in Calculations : ";
+    while(1)
+    {
+        gotoxy(60, 22);
+        if (accclass.addtotal)
+            cout<<"include  ";
+        else cout<<"avoid  ";
+
+        if (getch()=='\r')
+            break;
+        if (GetAsyncKeyState(VK_UP)||GetAsyncKeyState(VK_DOWN))
+        {   accclass.addtotal=!accclass.addtotal; getch();   }
+    }
+    fileout.open(temfilename, ios::binary);
+    fileout.close();
+    filein.open(accfilename, ios::binary);
+    for (int i=0; i<accounts; i++)
+    {
+        filein.seekg(i*sizeof(accclass2), ios::beg);
+        filein.read((char*)&accclass2, sizeof(accclass2));
+        if (i==cursor)
+        {
+            fileout.open(temfilename, ios::binary|ios::app);
+            fileout.write((char*)&accclass, sizeof(accclass));
+            fileout.close();
+        }
+        else
+        {
+            fileout.open(temfilename, ios::binary|ios::app);
+            fileout.write((char*)&accclass2, sizeof(accclass2));
+            fileout.close();
+        }
+    }
+    filein.close();
+    remove(accfilename);
+    rename(temfilename, accfilename);
+}
+void recordnewaccount()
+{
+    char name[100];
+    for (int i=21; i<100; i++)
+    {
+        gotoxy(i, 10); cout<<(char)196;
+        gotoxy(i, 30); cout<<(char)196;
+    }
+    for (int i=11; i<30; i++)
+    {
+        gotoxy(20, i); cout<<(char)179;
+        gotoxy(100, i); cout<<(char)179;
+    }
+    gotoxy(100, 10); cout<<(char)191;
+    gotoxy(20, 30); cout<<(char)192;
+    gotoxy(20, 10); cout<<(char)218;
+    gotoxy(100, 30); cout<<(char)217;
+    for (int i=21; i<=99; i++)
+        for (int j=11; j<=29; j++)
+    {gotoxy(i, j); cout<<" ";}
+    gotoxy(60-strlen("create a new account")/2, 12);
+    cout<<"CREATE A NEW ACCOUNT";
+    gotoxy(60-strlen("name : "), 20);
+    cout<<"Name : ";
+    accname:
+    gotoxy(60, 20);
+    gets(accclass.name);
+    for (int i=0; i<accounts; i++)
+    {
+        file.open(accfilename, ios::binary|ios::in);
+        file.seekg(i*sizeof(accclass2), ios::beg);
+        file.read((char*)&accclass2, sizeof(accclass2));
+        file.close();
+        if (strcmpi(accclass.name, accclass2.name)==0)
+        {
+            gotoxy(60-strlen("existence error")/2, 28);
+            cout<<"EXISTENCE ERROR";
+            getch();
+            gotoxy(60-strlen("existence error")/2, 28);
+            cout<<"               ";
+            gotoxy(60, 20);
+            for (int i=0; i<strlen(accclass.name); i++)
+                cout<<" ";
+            goto accname;
+        }
+    }
+    gotoxy(60-strlen("Status : "), 21);
+    cout<<"Status : ";
+    while(1)
+    {
+        gotoxy(60, 21);
+        if (accclass.hide)
+            cout<<"hidden  ";
+        else cout<<"visible  ";
+        if (getch()=='\r')
+            break;
+        if (GetAsyncKeyState(VK_UP)||GetAsyncKeyState(VK_DOWN))
+        {   accclass.hide=!accclass.hide; getch();  }
+    }
+    gotoxy(60-strlen("Consideration in calculations : "), 22);
+    cout<<"Consideration in Calculations : ";
+    while(1)
+    {
+        gotoxy(60, 22);
+        if (accclass.addtotal)
+            cout<<"include  ";
+        else cout<<"avoid  ";
+
+        if (getch()=='\r')
+            break;
+        if (GetAsyncKeyState(VK_UP)||GetAsyncKeyState(VK_DOWN))
+        {   accclass.addtotal=!accclass.addtotal; getch();   }
+    }
+    fileout.open(accfilename, ios::binary|ios::app);
+    fileout.write((char*)&accclass, sizeof(accclass));
+    fileout.close();
+    accounts++;
+    system("cls");
+}
+void recordnewlog(int accursor=0)
+{
+    int maximum[4];
+    char nostring[4], noostring[5];
+    logclass.refresh();
+    for (int i=0; i<4; i++)
+        nostring[i]=NULL;
+    for (int i=0; i<5; i++)
+        noostring[i]=NULL;
+    for (int i=21; i<100; i++)
+    {
+        gotoxy(i, 10); cout<<(char)196;
+        gotoxy(i, 25); cout<<(char)196;
+    }
+    for (int i=11; i<25; i++)
+    {
+        gotoxy(20, i); cout<<(char)179;
+        gotoxy(100, i); cout<<(char)179;
+    }
+    gotoxy(100, 10); cout<<(char)191;
+    gotoxy(20, 25); cout<<(char)192;
+    gotoxy(20, 10); cout<<(char)218;
+    gotoxy(100, 25); cout<<(char)217;
+    for (int i=21; i<=99; i++)
+        for (int j=11; j<=24; j++)
+    {gotoxy(i, j); cout<<" ";}
+    gotoxy(60-strlen("create a new log")/2, 12);
+    cout<<"CREATE A NEW LOG";
+    gotoxy(50-strlen("transaction : "), 15); cout<<"Transaction : ";
+    cin>>logclass.newbalance;
+    if (logclass.newbalance==0)
+    {   system("cls");return;}
+    if (logs!=0)
+    {
+        file.open(temfilename, ios::in);
+        file.seekg((logs-1)*sizeof(logclass2), ios::beg);
+        file.read((char*)&logclass2, sizeof(logclass2));
+        file.close();
+    }
+    else logclass2.newbalance=0;
+    logclass.newbalance+=logclass2.newbalance;
+    logclass.timeremod();
+    for (int i=0; i<30; i++)
+        logclass.thetime[i]=NULL;
+    gotoxy(50-strlen("Account : "), 16); cout<<"Account : ";
+    while (1)
+    {
+        filein.open(accfilename, ios::binary);
+        filein.seekg(accursor*sizeof(accclass), ios::beg);
+        filein.read((char*)&accclass, sizeof(accclass));
+        filein.close();
+        cout<<accclass.name;
+        if (getch()=='\r')
+        {
+            strcpy(logclass.account, accclass.name);
+            break;
+        }
+        for (int i=0; i<strlen(accclass.name); i++)
+            cout<<"\b \b";
+        if (GetAsyncKeyState(VK_UP)&&(accursor>0))
+        {
+            getch();
+            accursor--;
+        }
+        else if (GetAsyncKeyState(VK_DOWN)&&(accursor<accounts-1))
+        {
+            getch();
+            accursor++;
+        }
+    }
+
+    gotoxy(43, 17);cout<<"Year : ";
+    maximum[0]=logclass.year;
+    cout<<logclass.year;
+    while (getch()!='\r')
+    {
+        if (GetAsyncKeyState(VK_UP)&&(logclass.year<maximum[0]))
+        {
+            getch();
+            logclass.year++;
+            cout<<"\b\b\b\b";
+        }
+        else if(GetAsyncKeyState(VK_DOWN)&&(logclass.year>0))
+        {
+            getch();
+            logclass.year--;
+            cout<<"\b\b\b\b";
+        }
+        else continue;
+        cout<<logclass.year;
+    }
+
+    gotoxy(42, 18); cout<<"Month : ";
+    maximum[1]=logclass.month;
+    cout<<logclass.month;
+    while (getch()!='\r')
+    {
+        if (GetAsyncKeyState(VK_UP)&&((logclass.year<maximum[0])||((logclass.year==maximum[0])&&(logclass.month<maximum[1]))))
+        {
+            getch();
+            cout<<"\b \b";
+            if (logclass.month>9)
+                cout<<"\b";
+            logclass.month++;
+            if (logclass.month==13)
+            {
+                gotoxy(50, 17); cout<<++logclass.year;
+                gotoxy(50, 18);
+                logclass.month=1;
+            }
+        }
+        else if(GetAsyncKeyState(VK_DOWN))
+        {
+            getch();
+            cout<<"\b \b";
+            if (logclass.month>9)
+                cout<<"\b";
+            logclass.month--;
+            if (logclass.month==0)
+            {
+                gotoxy(50, 17); cout<<--logclass.year;
+                gotoxy(50, 18);
+                logclass.month=12;
+            }
+        }
+        else continue;
+        cout<<logclass.month;
+    }
+
+    gotoxy(43, 19); cout<<"Date : ";
+    cout<<logclass.date;
+    while (getch()!='\r')
+    {
+        if (GetAsyncKeyState(VK_UP))
+        {
+            getch();
+            cout<<"\b \b";
+            if (logclass.date>9)
+                cout<<"\b";
+            if (logclass.date==lastdate(logclass.month, logclass.year))
+                logclass.date=1;
+            else logclass.date++;
+            cout<<logclass.date;
+        }
+        else if (GetAsyncKeyState(VK_DOWN))
+        {
+            getch();
+            cout<<"\b \b";
+            if (logclass.date>9)
+                cout<<"\b";
+            if (logclass.date==1)
+                logclass.date=lastdate(logclass.month, logclass.year);
+            else logclass.date--;
+            cout<<logclass.date;
+        }
+    }
+
+    gotoxy(43, 20); cout<<"Hour : ";
+    cout<<logclass.hour;
+    while (getch()!='\r')
+    {
+        if (GetAsyncKeyState(VK_UP))
+        {
+            getch();
+            cout<<"\b \b";
+            if (logclass.hour>9)
+                cout<<"\b";
+            if (logclass.hour==23)
+                logclass.hour=0;
+            else logclass.hour++;
+            cout<<logclass.hour;
+        }
+        else if (GetAsyncKeyState(VK_DOWN))
+        {
+            getch();
+            cout<<"\b \b";
+            if (logclass.hour>9)
+                cout<<"\b";
+            if (logclass.hour==0)
+                logclass.hour=23;
+            else logclass.hour--;
+            cout<<logclass.hour;
+        }
+    }
+
+    ///ZELLER'S RULE
+    int f, month, D=logclass.year%100, C=logclass.year/100;
+    if (logclass.month>=3) month=logclass.month-2;
+    else { month=logclass.month+10; D--; }
+    f=logclass.date+(int)((13*month-1)/5)+D+(int)(D/4)+(int)(C/4)-2*C;
+    f%=7;
+    switch(f)
+    {
+    case 0:strcpy(logclass.thetime, "Sun "); break;
+    case 1:strcpy(logclass.thetime, "Mon "); break;
+    case 2:strcpy(logclass.thetime, "Tue "); break;
+    case 3:strcpy(logclass.thetime, "Wed "); break;
+    case 4:strcpy(logclass.thetime, "Thu "); break;
+    case 5:strcpy(logclass.thetime, "Fri "); break;
+    case 6:strcpy(logclass.thetime, "Sat "); break;
+    }
+    switch (logclass.month)
+    {
+    case 1:strcat(logclass.thetime, "Jan "); break;
+    case 2:strcat(logclass.thetime, "Feb "); break;
+    case 3:strcat(logclass.thetime, "Mar "); break;
+    case 4:strcat(logclass.thetime, "Apr "); break;
+    case 5:strcat(logclass.thetime, "May "); break;
+    case 6:strcat(logclass.thetime, "Jun "); break;
+    case 7:strcat(logclass.thetime, "Jul "); break;
+    case 8:strcat(logclass.thetime, "Aug "); break;
+    case 9:strcat(logclass.thetime, "Sep "); break;
+    case 10:strcat(logclass.thetime, "Oct ");break;
+    case 11:strcat(logclass.thetime, "Nov ");break;
+    case 12:strcat(logclass.thetime, "Dec ");break;
+    }
+    /*/cout<<logclass.thetime; getch();//*/
+    if (logclass.date<10)
+    {    nostring[0]='0'; nostring[1]=(char)(48+logclass.date);}
+    else
+    {   nostring[0]=(char)(48+(logclass.date/10)); nostring[1]=(char)(48+(logclass.date%10));}
+    nostring[2]=' ';
+    strcat(logclass.thetime, nostring);
+    /*/cout<<logclass.thetime; getch();//*/
+    if (logclass.hour<10)
+    {    nostring[0]='0'; nostring[1]=(char)(48+logclass.hour);}
+    else
+    {   nostring[0]=(char)(48+(logclass.hour/10)); nostring[1]=(char)(48+(logclass.hour%10));}
+    nostring[2]=':';
+    strcat(logclass.thetime, nostring);
+    /*/cout<<logclass.thetime; getch();//*/
+    if (logclass.minute<10)
+    {    nostring[0]='0'; nostring[1]=(char)(48+logclass.minute);}
+    else
+    {   nostring[0]=(char)(48+(logclass.minute/10)); nostring[1]=(char)(48+(logclass.minute%10));}
+    nostring[2]=':';
+    strcat(logclass.thetime, nostring);
+    /*/cout<<logclass.thetime; getch();//*/
+    if (logclass.second<10)
+    {    nostring[0]='0'; nostring[1]=(char)(48+logclass.second);}
+    else
+    {   nostring[0]=(char)(48+(logclass.second/10)); nostring[1]=(char)(48+(logclass.second%10));}
+    nostring[2]=' ';
+    strcat(logclass.thetime, nostring);
+
+    noostring[0]=(char)(48+(logclass.year/1000));
+    noostring[1]=(char)(48+((logclass.year%1000)/100));
+    noostring[2]=(char)(48+((logclass.year%100)/10));
+    noostring[3]=(char)(48+(logclass.year%10));
+    strcat(logclass.thetime, noostring);/*/cout<<logclass.thetime; getch();//*/
+
+    gotoxy(40, 21); cout<<"Details : ";
+    cin.ignore();
+    autogets(logclass.details, "[       30 characters        ]");
+    fileout.open(logfilename, ios::binary|ios::app);
+    fileout.write((char*)&logclass, sizeof(logclass));
+    fileout.close();
+    logs++;
+    system("cls");
+}
+int main()
+{
+    signature(true);
+    system("mode 120, 35");
+
+    int logcursor[2], accountcursor[2], acrecord=-1, maxyear, minyear;
+    long double sum1, sum2;
+    strcpy(logfilename, "logfiles_JAYcreations.dat");
+    strcpy(accfilename, "accfiles_JAYcreations.dat");
+    strcpy(pasfilename, "passfile_JAYcreations.dat");
+    strcpy(temfilename, "temfiles_JAYcreations.dat");
+    file.open(logfilename, ios::binary);
+    file.close();
+    file.open(accfilename, ios::binary);
+    file.close();
+    logs=logcount();
+    accounts=accountcount();
+    if (accounts==0)
+    {
+        instructions();
+        recordnewaccount();
+    }
+    accountcursor[1]=accounts;
+    accountcursor[0]=accountcursor[1]-25;//
+    if (accountcursor[0]<0) accountcursor[0]=0;
+
+    if (!authorized())
+        return 0;
+    mainmenu:
+    screen=mainmenu();
+    if (screen!=previouscreen)
+    {
+        system("cls");
+        previouscreen=screen;
+    }
+    switch(screen)
+    {
+    case 2:account:///ACCOUNTS
+        for (int i=0; i<120; i++)
+        {
+            gotoxy(i, 3); cout<<(char)196;
+            gotoxy(i, 33); cout<<(char)196;
+        }
+        gotoxy(56, 1);
+        cout<<"ACCOUNTS";
+        gotoxy(0, 34);
+        accounts=accountcount();
+        cout<<"Account count - "<<accounts;
+
+        while (1)
+        {
+            for (int i=accountcursor[0]; (i<accountcursor[0]+25)&&(i<accounts); i++)
+            {
+                file.open(accfilename, ios::binary|ios::in);
+                file.seekg((i*sizeof(accclass)), ios::beg);
+                file.read((char*)&accclass, sizeof(accclass));
+                file.close();
+                //cout<<"\tx, y : "<<60-strlen(accclass.name)/2<<", "<<i-accountcursor[0]+6;getch();
+                gotoxy(60-strlen(accclass.name)/2, i-accountcursor[0]+6);
+                cout<<accclass.name;
+            }
+            if (accountcursor[1]==accounts)
+            {
+                gotoxy(60-strlen("Add a new Account")/2, accountcursor[1]+6-accountcursor[0]);
+                cout<<"ADD A NEW ACCOUNT";
+            }
+            gotoxy(20, 6+accountcursor[1]-accountcursor[0]); if (accountcursor[1]!=accounts)cout<<"DELETE <"; else cout<<"       <";
+            gotoxy(120-28, 6+accountcursor[1]-accountcursor[0]); if (accountcursor[1]!=accounts)cout<<"> EDIT";else cout<<">";
+
+            if (getch()=='\r')
+                if (accountcursor[1]==accounts)
+                {
+                    recordnewaccount();
+                    previouscreen=-1;
+                    goto account;
+                }
+                else
+                {
+                    for (int i=21; i<100; i++)
+                    {
+                        gotoxy(i, 10); cout<<(char)196;
+                        gotoxy(i, 20); cout<<(char)196;
+                    }
+                    for (int i=11; i<20; i++)
+                    {
+                        gotoxy(20, i); cout<<(char)179;
+                        gotoxy(100, i); cout<<(char)179;
+                    }
+                    for (int i=21; i<100; i++)
+                        for (int j=11; j<20; j++)
+                        {   gotoxy(i, j); cout<<" ";    }
+                    gotoxy(20, 10); cout<<(char)218;
+                    gotoxy(100, 10); cout<<(char)191;
+                    gotoxy(20, 20); cout<<(char)192;
+                    gotoxy(100, 20); cout<<(char)217;
+                    gotoxy(59-strlen("account details")/2, 12);
+                    cout<<"ACCOUNT DETAILS";
+                    file.open(accfilename, ios::binary|ios::in);
+                    file.seekg(accountcursor[1]*sizeof(accclass), ios::beg);
+                    file.read((char*)&accclass, sizeof(accclass));
+                    file.close();
+                    gotoxy(60-7, 15); cout<<"Name : "<<accclass.name;
+                    gotoxy(60-7, 16); cout<<"Hide : "; if (accclass.hide) cout<<"TRUE"; else cout<<"FALSE";
+                    gotoxy(60-12, 17);cout<<"Add total : "; if (accclass.addtotal) cout<<"TRUE"; else cout<<"FALSE";
+                    getch();
+                    system("Cls");
+                    goto account;
+                }
+            gotoxy(20, 6+accountcursor[1]-accountcursor[0]); cout<<"        ";
+            gotoxy(120-28, 6+accountcursor[1]-accountcursor[0]); cout<<"      ";
+            for (int i=accountcursor[0]; (i<accountcursor[0]+25)&&(i<=accounts); i++)
+            {
+                if (i<accounts)
+                {
+                    file.open(accfilename, ios::binary|ios::in);
+                    file.seekg((i*sizeof(accclass)), ios::beg);
+                    file.read((char*)&accclass, sizeof(accclass));
+                    file.close();
+                    gotoxy(60-strlen(accclass.name)/2, i-accountcursor[0]+6);
+                    for (int j=0; j<strlen(accclass.name); j++) cout<<" ";
+                }
+                else
+                {
+                    gotoxy(60-strlen("Add a new Account")/2, i+6-accountcursor[0]);
+                    cout<<"                 ";
+                }
+            }
+            if (GetAsyncKeyState(VK_ESCAPE))
+                goto mainmenu;
+            if (GetAsyncKeyState(VK_DOWN)&&(accountcursor[1]<accounts))
+            {
+                getch();
+                accountcursor[1]++;
+                if (accountcursor[1]>=accountcursor[0]+25)
+                    accountcursor[0]++;
+            }
+            else if(GetAsyncKeyState(VK_UP)&&(accountcursor[1]>0))
+            {
+                getch();
+                accountcursor[1]--;
+                if (accountcursor[1]<accountcursor[0])
+                    accountcursor[0]--;
+            }
+            else if (GetAsyncKeyState(VK_LEFT))
+            {
+                getch();
+                if (accountcursor[1]!=accounts)
+                    if (!authorized())
+                        goto account;
+                    else
+                    {
+                        filein.open(accfilename, ios::binary);
+                        filein.seekg(accountcursor[1]*sizeof(accclass), ios::beg);
+                        filein.read((char*)&accclass, sizeof(accclass));
+                        filein.close();
+                        gotoxy(60-(strlen("delete account    ?")+strlen(accclass.name))/2, 12);
+                        cout<<"Delete Account \""<<accclass.name<<"\" ?";
+                        gotoxy(58, 13);
+                        gets(word);
+                        if (no(word))
+                        {
+                            system("cls");
+                            goto account;
+                        }
+                        else
+                        {
+                            deleteaccount(accclass.name);
+                            system("cls");
+                            goto account;
+                        }
+                    }
+            }
+            else if (GetAsyncKeyState(VK_RIGHT))
+            {
+                getch();
+                if (accountcursor[1]!=accounts)
+                    if (!authorized())
+                        goto account;
+                    else
+                    {
+                        editaccount(accountcursor[1]);
+                        system("cls");
+                        goto account;
+                    }
+            }
+        }
+    case 3:///Password
+        if (!authorized())
+        {
+            system("cls");
+            gotoxy(60-strlen("unauthorized access")/2, 17);
+            _sleep(300);
+            cout<<("UNAUTHORIZED ACCESS");
+            _sleep(800);
+            gotoxy(60-strlen("terminating ...")/2, 18);
+            coutput("TERMINATING ...", 3);
+            return 0;
+        }
+        repass:
+        gotoxy(60-strlen("new password : "), 17);
+        cout<<"New Password : ";
+        getpass(password.word);
+        gotoxy(60-strlen("confirm password : "), 18);
+        cout<<"Confirm Password : ";
+        getpass(word);
+        if (strcmp(word, password.word)!=0)
+        {   gotoxy(60-strlen("mismatch")/2, 20); cout<<"MISMATCH"; _sleep(200); system("cls"); goto repass;      }
+        if (strlen(word)<1)
+        {   gotoxy(60-strlen("passwrod removed")/2, 20); cout<<"Password Removed"; getch(); password.allowed=true; }
+        else
+        {   gotoxy(60-strlen("password changed")/2, 20); cout<<"Password Changed"; getch(); password.allowed=false;}
+        file.open(pasfilename, ios::out);
+        file.write((char*)&password, sizeof(password));
+        file.close();
+        break;
+    case 4:///EXIT
+        remove(temfilename);
+        return 0;
+    case 5:ylog:///YEARLY LOG
+        if (logcount()<=0)
+            goto mainmenu;
+        if (acrecord<0)
+            acrecord=0;
+        if (accountcount()==0)
+        {
+            recordnewaccount();
+            goto mainmenu;
+        }
+        for (int i=0; i<120; i++)
+        {
+            gotoxy(i, 3); cout<<(char)196;
+            gotoxy(i, 33); cout<<(char)196;
+        }
+        for (int i=4; i<33; i++)
+        {
+            gotoxy(10, i); cout<<(char)179;
+            gotoxy(64, i); cout<<(char)179;
+        }
+        gotoxy(37, 2); cout<<"+"; gotoxy(92, 2); cout<<"-";
+        filein.open(accfilename, ios::binary);
+        filein.seekg(acrecord*sizeof(accclass), ios::beg);
+        filein.read((char*)&accclass, sizeof(accclass));
+        filein.close();
+        if (acrecord!=0)
+            {gotoxy(60-strlen(accclass.name)/2-2, 1); cout<<"<";}
+        if (acrecord!=accounts-1)
+            {gotoxy(60+strlen(accclass.name)/2+1, 1); cout<<">";}
+        gotoxy(60-strlen(accclass.name)/2, 1); cout<<accclass.name;
+        //assigning max and min year
+        logs=logcount();
+        for (int i=0; i<logs; i++)
+        {
+            filein.open(logfilename, ios::binary);
+            filein.seekg(i*sizeof(logclass), ios::beg);
+            filein.read((char*)&logclass, sizeof(logclass));
+            filein.close();
+            if (i==0)
+                maxyear=minyear=logclass.year;
+            else
+            {
+                if (maxyear<logclass.year)
+                    maxyear=logclass.year;
+                if (minyear>logclass.year)
+                    minyear=logclass.year;
+            }
+        }
+        logcursor[1]=maxyear;
+        logcursor[0]=minyear;
+        if (maxyear-minyear>25)
+            logcursor[0]=logcursor[1]-25;
+
+        for (bool newscreen=true; 1; )
+        {
+            if (newscreen)
+            {
+                newscreen=false;
+                for (int i=logcursor[0]; ((i<logcursor[0]+25)&&(i<=maxyear)); i++)
+                {
+                    gotoxy(3, 6+i-logcursor[0]); cout<<"    ";
+                    //display + and -
+                    gotoxy(30, 6+i-logcursor[0]); cout<<"                              ";
+                    gotoxy(85, 6+i-logcursor[0]); cout<<"                              ";
+                }
+                for (int i=logcursor[0]; ((i<logcursor[0]+25)&&(i<=maxyear)); i++)
+                {
+                    gotoxy(3, 6+i-logcursor[0]); cout<<i;
+                    //write logs with the same acc into tem
+                    fileout.open(temfilename, ios::binary);
+                    fileout.close();
+                    for (int j=0; j<logs; j++)
+                    {
+                        filein.open(logfilename, ios::binary);
+                        filein.seekg(j*sizeof(logclass), ios::beg);
+                        filein.read((char*)&logclass, sizeof(logclass));
+                        filein.close();
+                        if (strcmp(accclass.name, logclass.account)==0)
+                        {
+                            fileout.open(temfilename, ios::binary|ios::app);
+                            fileout.write((char*)&logclass, sizeof(logclass));
+                            fileout.close();//**/gotoxy(0, 34); cout<<"logclass balance:"<<logclass.newbalance; getch();
+                        }
+                    }
+                    //rewriting tem with transactions instead of balances
+                    logs=logcountspecific(accclass.name);
+                    fileout.open("bleh.dat", ios::binary);
+                    fileout.close();
+                    for (int j=0; j<logs; j++)
+                    {
+                        filein.open(temfilename, ios::binary);
+                        filein.seekg(j*sizeof(logclass), ios::beg);
+                        filein.read((char*)&logclass, sizeof(logclass));
+                        filein.close();
+                        //**/gotoxy(0, 34); cout<<"logi:"<<logclass.newbalance;
+                        if (j==0)
+                            logclass2.newbalance=0;
+                        else
+                        {
+                            filein.open(temfilename, ios::binary);
+                            filein.seekg((j-1)*sizeof(logclass2), ios::beg);
+                            filein.read((char*)&logclass2, sizeof(logclass2));
+                            filein.close();
+                        }//**/cout<<" logi-1:"<<logclass2.newbalance;
+                        logclass.newbalance-=logclass2.newbalance;//**/cout<<" final:"<<logclass.newbalance;getch();
+                        fileout.open("bleh.dat", ios::binary|ios::app);
+                        fileout.write((char*)&logclass, sizeof(logclass));
+                        fileout.close();
+                    }
+                    remove(temfilename);
+                    rename("bleh.dat", temfilename);
+                    //loop through logs to find + and -
+                    sum1=sum2=0;
+                    for (int j=0; j<logs; j++)
+                    {
+                        filein.open(temfilename, ios::binary);
+                        filein.seekg(j*sizeof(logclass), ios::beg);
+                        filein.read((char*)&logclass, sizeof(logclass));
+                        filein.close();
+                        if (logclass.year==i)
+                            if (logclass.newbalance<0)
+                                sum2+=(-logclass.newbalance);
+                            else sum1+=logclass.newbalance;
+                    }
+                    //display + and -
+                    gotoxy(30, 6+i-logcursor[0]); cout<<setw(30)<<sum1;
+                    gotoxy(85, 6+i-logcursor[0]); cout<<setw(30)<<sum2;
+                }
+            }
+            gotoxy(62, 6+logcursor[1]-logcursor[0]); cout<<"<";
+            gotoxy(117, 6+logcursor[1]-logcursor[0]); cout<<"<";
+            getch();
+            gotoxy(62, 6+logcursor[1]-logcursor[0]); cout<<" ";
+            gotoxy(117, 6+logcursor[1]-logcursor[0]); cout<<" ";
+            if (GetAsyncKeyState(VK_ESCAPE))
+            {
+                remove(temfilename);
+                goto mainmenu;
+            }
+            else if ((GetAsyncKeyState(VK_UP))&&(logcursor[1]>=logcursor[0]))
+            {
+                getch();
+                if (logcursor[1]==logcursor[0])
+                {
+                    if (logcursor[0]!=minyear)
+                    { logcursor[0]--; logcursor[1]--; newscreen=true;}
+                }
+                else
+                    logcursor[1]--;
+            }
+            else if (GetAsyncKeyState(VK_DOWN)&&(logcursor[1]<=logcursor[0]+25)&&(logcursor[1]<maxyear))
+            {
+                getch();
+                if (logcursor[1]==logcursor[0]+25)
+                {//if (logcursor[1]!=maxyear)
+                    logcursor[0]++; logcursor[1]++; newscreen=true;
+                }
+                else
+                    logcursor[1]++;
+            }
+            else if (GetAsyncKeyState(VK_RIGHT)&&(acrecord<accounts-1))
+            {
+                getch();
+                acrecord++;
+                system("cls");
+                goto ylog;
+            }
+            else if (GetAsyncKeyState(VK_LEFT)&&(acrecord>0))
+            {
+                getch();
+                acrecord--;
+                system("cls");
+                goto ylog;
+            }
+        }
+    case 6:///MONTHLY LOG
+        break;
+    case 7:///DAILY LOG
+        break;
+    case 8:log:///ALL LOGS
+        if (accountcount()==0)
+        {
+            recordnewaccount();
+            goto mainmenu;
+        }
+        if (acrecord<0)
+            acrecord=0;
+        for (int i=0; i<120; i++)
+        {
+            gotoxy(i, 3); cout<<(char)196;
+            gotoxy(i, 33); cout<<(char)196;
+        }
+        for (int i=4; i<33; i++)
+        {
+            gotoxy(44, i); cout<<(char)179;
+            gotoxy(76, i); cout<<(char)179;
+        }
+        gotoxy(58, 1);
+        cout<<"LOGS";
+        fileout.open(temfilename, ios::binary);
+        fileout.close();
+        filein.open(accfilename, ios::binary);
+        filein.seekg(acrecord*sizeof(accclass), ios::beg);
+        filein.read((char*)&accclass, sizeof(accclass));
+        filein.close();
+        logs=logcount(); gotoxy(0, 34); cout<<"Log count - "<<logs;
+        for (int i=0; i<logs; i++)
+        {
+            filein.open(logfilename, ios::binary);
+            filein.seekg(i*sizeof(logclass), ios::beg);
+            filein.read((char*)&logclass, sizeof(logclass));
+            filein.close();
+            if (strcmp(accclass.name, logclass.account)==0)
+            {
+                fileout.open(temfilename, ios::binary|ios::app);
+                fileout.write((char*)&logclass, sizeof(logclass));
+                fileout.close();
+            }
+        }
+        _sleep(200); logs=logcountspecific(accclass.name); gotoxy(0, 34); cout<<"Log count -                               \b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b"<<logs;
+        logcursor[1]=logs;
+        logcursor[0]=logcursor[1]-25;//depends on log screen components.
+        if (logcursor[0]<0) logcursor[0]=0;
+        if (logcursor[1]<0) logcursor[1]=0;
+        gotoxy(21, 2);cout<<(char)192<<(char)191;
+        gotoxy(98-strlen(accclass.name)/2, 2); if(acrecord!=0)cout<<"\b\b< "; cout<<accclass.name; if (acrecord<accounts-1) cout<<" >";
+
+        while (1)
+        {
+            for (int i=logcursor[0]; (i<logcursor[0]+25)&&(i<logs); i++)
+            {
+                file.open(temfilename, ios::binary|ios::in);
+                file.seekg((i*sizeof(logclass)), ios::beg);
+                file.read((char*)&logclass, sizeof(logclass));
+                file.seekg(((i-1)*sizeof(logclass2)), ios::beg);
+                file.read((char*)&logclass2, sizeof(logclass2));
+                file.close();
+                gotoxy(77, i-logcursor[0]+6);
+                cout<<setw(30)<<logclass.newbalance;
+                gotoxy(11, i-logcursor[0]+6);
+                if (i>0)
+                {
+                    cout<<setw(30)<<abs(logclass.newbalance-logclass2.newbalance);
+                    if (logclass.newbalance-logclass2.newbalance<0)
+                        cout<<"-";
+                    else cout<<"+";
+                }
+            }
+            gotoxy(43, 6+logcursor[1]-logcursor[0]); cout<<"<";
+            gotoxy(108, 6+logcursor[1]-logcursor[0]); cout<<"<";
+            gotoxy(48, 6+logcursor[1]-logcursor[0]);
+            file.open(temfilename, ios::binary|ios::in);
+            file.seekg(logcursor[1]*sizeof(logclass), ios::beg);
+            file.read((char*)&logclass, sizeof(logclass));
+            file.close();
+            if (logcursor[1]==logs)
+            {
+                gotoxy(60-strlen("add a new log")/2, logcursor[1]+6-logcursor[0]);
+                cout<<"ADD A NEW LOG";
+            }
+            else cout<<logclass.thetime;
+
+            if (getch()=='\r')
+                if (logcursor[1]==logs)
+                {
+                    recordnewlog(acrecord);
+                    //arrangelog();
+                    previouscreen=-1;
+                    goto log;
+                }
+                else
+                {
+                    for (int i=21; i<100; i++)
+                    {
+                        gotoxy(i, 10); cout<<(char)196;
+                        gotoxy(i, 20); cout<<(char)196;
+                    }
+                    for (int i=11; i<20; i++)
+                    {
+                        gotoxy(20, i); cout<<(char)179;
+                        gotoxy(100, i); cout<<(char)179;
+                    }
+                    for (int i=21; i<100; i++)
+                        for (int j=11; j<20; j++)
+                        {   gotoxy(i, j); cout<<" ";    }
+                    gotoxy(20, 10); cout<<(char)218;
+                    gotoxy(100, 10); cout<<(char)191;
+                    gotoxy(20, 20); cout<<(char)192;
+                    gotoxy(100, 20); cout<<(char)217;
+                    gotoxy(53, 12);
+                    cout<<"LOG DETAILS";
+                    gotoxy(60-10, 14); cout<<"Balance : "<<logclass.newbalance;
+                    gotoxy(60-10, 15); cout<<"Account : "<<logclass.account;
+                    gotoxy(60-7, 16); cout<<"Time : "<<logclass.thetime;
+                    gotoxy(60-10, 17); cout<<"Details : "<<logclass.details;
+                    getch();
+                    system("cls");
+                    goto log;
+                }
+            for (int i=logcursor[0]; (i<logcursor[0]+25)&&(i<logs); i++)
+            {
+                gotoxy(77, i-logcursor[0]+6);
+                cout<<"                              ";
+                gotoxy(11, i-logcursor[0]+6);
+                if (i>0)
+                    cout<<"                               ";
+            }
+            gotoxy(43, 6+logcursor[1]-logcursor[0]); cout<<" ";
+            gotoxy(108, 6+logcursor[1]-logcursor[0]); cout<<" ";
+            gotoxy(48, 6+logcursor[1]-logcursor[0]);
+            if (logcursor[1]==logs)
+            {
+                gotoxy(60-strlen("add a new log")/2, logcursor[1]+6-logcursor[0]);
+                cout<<"             ";
+            }
+            else cout<<"                         ";
+            if (GetAsyncKeyState(VK_ESCAPE))
+                goto mainmenu;
+            else if (GetAsyncKeyState(VK_DOWN)&&(logcursor[1]<logs))
+            {
+                getch();
+                logcursor[1]++;
+                if (logcursor[1]>=logcursor[0]+25)
+                    logcursor[0]++;
+            }
+            else if (GetAsyncKeyState(VK_UP)&&(logcursor[1]>0))
+            {
+                getch();
+                logcursor[1]--;
+                if (logcursor[1]<logcursor[0])
+                    logcursor[0]--;
+            }
+            else if (GetAsyncKeyState(VK_RIGHT)&&(acrecord<accounts-1))
+            {
+                getch();
+                acrecord++;
+                system("cls");
+                goto log;
+            }
+            else if (GetAsyncKeyState(VK_LEFT)&&(acrecord>0))
+            {
+                getch();
+                acrecord--;
+                system("cls");
+                goto log;
+            }
+        }
+    }
+    goto mainmenu;
+}
